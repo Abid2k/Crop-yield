@@ -97,7 +97,7 @@ The model achieves the following performance on the test set:
 
 The following graph shows a comparison of actual and predicted values for 50 random samples:
 
-![Actual vs Predicted](actual_vs_predicted.png)
+![Actual vs Predicted](Actual vs Predicted.png)
 
   
 ## Conclusion
