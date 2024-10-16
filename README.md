@@ -1,115 +1,100 @@
-Crop Yield Prediction with MLP-GRU Model
-This project aims to predict crop yield based on various agricultural features using a hybrid MLP-GRU model. The dataset used includes crop information, yield, fertilizer, rainfall, and pesticide usage data across various states in India.
+# Crop Yield Prediction Using MLP-GRU Model
 
-Table of Contents
-Project Overview
-Installation
-Data Overview
-Exploratory Data Analysis (EDA)
-Model Architecture
-Training
-Evaluation Metrics
-Results
-Dependencies
-License
-Project Overview
-The project combines data preprocessing, feature engineering, and a hybrid MLP-GRU model to predict crop yield. The aim is to assess the impact of factors like rainfall, pesticide, fertilizer, and crop type on crop yield using deep learning techniques.
+This project is focused on predicting crop yield based on factors like area, rainfall, fertilizer usage, pesticide usage, and season using a hybrid neural network model with MLP and GRU architectures. The dataset contains historical agricultural data, including various crop-related attributes, across multiple states and years in India.
 
-Installation
-Clone the repository:
+## Table of Contents
+- [Installation](#installation)
+- [Dataset](#dataset)
+- [Data Preprocessing](#data-preprocessing)
+- [Exploratory Data Analysis](#exploratory-data-analysis)
+- [Model Architecture](#model-architecture)
+- [Training](#training)
+- [Evaluation](#evaluation)
+- [Results](#results)
 
-bash
-Copy code
-git clone <repository_url>
-Install the required libraries:
+## Installation
 
-bash
-Copy code
-pip install -r requirements.txt
-Data Overview
-The dataset is structured with crop attributes, meteorological data, and yearly yield values for various states in India.
+To run this project, install the following libraries (if not already installed):
 
-Key Columns:
-Crop: Type of crop cultivated.
-Crop Year: Year of cultivation.
-Season: Season of cultivation (e.g., Kharif, Rabi).
-State: Indian state where the crop was cultivated.
-Yield: Yield per unit area (target variable).
-Data Loading
-Data is loaded using pandas and summarized to check for missing values, data types, and basic statistics:
+```bash
+pip install numpy pandas matplotlib seaborn tensorflow scikit-learn
+```
 
-python
-Copy code
-df = pd.read_csv('Dataset/crop_yield.csv')
-df.info()
-df.describe()
-Exploratory Data Analysis (EDA)
-The EDA covers:
+## Dataset
 
-Count of records by crop, season, and state.
-Summary statistics and distribution of key variables.
-Correlation analysis of numerical variables.
-Outlier detection using the IQR method.
-Sample plots include:
+The dataset used in this project is `crop_yield.csv`, containing features such as:
+- Crop Type
+- Crop Year
+- Season
+- State
+- Area under cultivation
+- Production
+- Annual Rainfall
+- Fertilizer usage
+- Pesticide usage
+- Yield (target variable)
 
-Bar plots for crop and season counts.
-Box plots for identifying outliers in Area, Production, and Yield.
-Scatter plots to assess the impact of rainfall, fertilizer, and pesticide on yield.
-Model Architecture
-This model is a hybrid of MLP (Multilayer Perceptron) and GRU (Gated Recurrent Unit) layers:
+## Data Preprocessing
 
-MLP Input: Processes the features as dense layers with L2 regularization.
-GRU Input: Handles temporal dependencies in a sequence format.
-Concatenation Layer: Combines MLP and GRU outputs.
-Output Layer: Dense layer to predict crop yield.
-python
-Copy code
-# Define the MLP-GRU model
-from tensorflow.keras.layers import Input, GRU, Dense, Concatenate
-from tensorflow.keras.models import Model
-from tensorflow.keras.optimizers import Adam
-from tensorflow.keras.regularizers import l2
+1. **Feature Engineering**: 
+   - Log transformations for skewed features (`log_Area`, `log_Production`, `log_Fertilizer`, etc.).
+   - Created interaction features (`Fertilizer_Pesticide`, `Fertilizer_Rainfall`).
+   
+2. **Encoding**: 
+   - One-hot encoding applied to categorical columns (`Crop`, `Season`, `State`).
 
-gru_input = Input(shape=(X_train.shape[1], 1))
-gru_output = GRU(64)(gru_input)
+3. **Splitting & Scaling**:
+   - Dataset split into training and testing sets (80/20).
+   - StandardScaler applied for feature scaling.
 
-mlp_input = Input(shape=(X_train.shape[1],))
-mlp_output = Dense(64, activation='relu', kernel_regularizer=l2(0.01))(mlp_input)
+## Exploratory Data Analysis
 
-combined = Concatenate()([gru_output, mlp_output])
-final_output = Dense(1)(combined)
+Exploratory Data Analysis (EDA) involves:
+- Distribution of crops, seasons, and states.
+- Outlier detection in variables like `Area`, `Production`, etc., using IQR.
+- Correlation matrix to analyze relationships among numeric features.
+- Yearly trends in yield, area, and input usage.
 
-model = Model(inputs=[gru_input, mlp_input], outputs=final_output)
-model.compile(optimizer=Adam(learning_rate=0.001), loss='mean_squared_error', metrics=['mae'])
-Training
-The model is trained with callbacks for early stopping, model checkpointing, and learning rate reduction.
+## Model Architecture
 
-Training Hyperparameters:
-Learning Rate: 0.001
-Epochs: 50
-Batch Size: 32
-Evaluation Metrics
-Mean Absolute Error (MAE)
-Mean Squared Error (MSE)
-R-squared (R²)
-Sample code:
+The prediction model is a hybrid of Multi-Layer Perceptron (MLP) and Gated Recurrent Unit (GRU):
+- **GRU**: Processes sequential data.
+- **MLP**: Captures non-sequential feature relationships.
+- **Combined Output**: Concatenates GRU and MLP outputs and passes through dense layers.
+- **Output Layer**: Produces final yield prediction.
 
-python
-Copy code
-from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
+## Training
 
-mae = mean_absolute_error(y_test, y_pred)
-mse = mean_squared_error(y_test, y_pred)
-r2 = r2_score(y_test, y_pred)
-Results
-The model provides high accuracy with R² values close to 0.99. Sample results and plots include:
+The model is trained using:
+- Optimizer: Adam with learning rate of 0.001.
+- Loss function: Mean Squared Error (MSE).
+- Callbacks:
+  - `ModelCheckpoint` for saving the best model.
+  - `EarlyStopping` to avoid overfitting.
+  - `ReduceLROnPlateau` to reduce learning rate on plateau.
 
-Actual vs Predicted Values plot for random samples.
-Model Loss and MAE during training and validation.
-Dependencies
-Python 3.8+
-Pandas, Numpy, Scikit-Learn
-TensorFlow, Keras
-Matplotlib, Seaborn
-License
-This project is licensed under the MIT License.
+## Evaluation
+
+The model is evaluated using:
+- Mean Absolute Error (MAE)
+- Mean Squared Error (MSE)
+- R-squared (R²)
+
+## Results
+
+The model achieves the following performance on the test set:
+- **MAE**: 0.062
+- **MSE**: 0.0097
+- **R²**: 0.992
+
+## Visualizations
+
+1. **Training Curves**:
+   - Loss and MAE values during training and validation.
+   
+2. **Actual vs Predicted**:
+   - Plot comparing actual and predicted yields for 50 random samples.
+  
+## Conclusion
+
+This project provides a comprehensive approach to crop yield prediction using deep learning. The MLP-GRU model combines both sequential and non-sequential feature relationships, achieving high accuracy in predicting yield values.
